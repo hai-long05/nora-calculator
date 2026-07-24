@@ -1,5 +1,3 @@
-import * as React from "react"
-
 import {
   Select,
   SelectContent,
@@ -8,7 +6,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { FEDERAL_STATES } from "@/lib/calculator-data"
+import { FEDERAL_STATE_ITEMS, FEDERAL_STATES } from "@/lib/calculator-data"
+import { useCalculator } from "@/components/calculator/calculator-context"
 import { CalcCard } from "@/components/calculator/calc-card"
 import { SectionHeader } from "@/components/calculator/section-header"
 import { Field } from "@/components/calculator/field"
@@ -17,22 +16,7 @@ import { TimePicker } from "@/components/calculator/time-picker"
 import { HolidayOverrides } from "@/components/calculator/holiday-overrides"
 
 export function ShiftDataCard() {
-  const [shiftStartDate, setShiftStartDate] = React.useState<Date | undefined>(
-    new Date(2026, 6, 18)
-  )
-  const [shiftStartTime, setShiftStartTime] = React.useState("20:00")
-  const [shiftEndDate, setShiftEndDate] = React.useState<Date | undefined>(
-    new Date(2026, 6, 19)
-  )
-  const [shiftEndTime, setShiftEndTime] = React.useState("06:00")
-  const [breakMinutes, setBreakMinutes] = React.useState("30")
-  const [breakStartDate, setBreakStartDate] = React.useState<Date | undefined>(
-    new Date(2026, 6, 19)
-  )
-  const [breakStartTime, setBreakStartTime] = React.useState("00:00")
-  const [nightFrom, setNightFrom] = React.useState("22:00")
-  const [nightTo, setNightTo] = React.useState("06:00")
-  const [state, setState] = React.useState("brandenburg")
+  const { form, setField } = useCalculator()
 
   return (
     <CalcCard>
@@ -42,11 +26,14 @@ export function ShiftDataCard() {
         <Field label="Schichtbeginn " required>
           <div className="flex gap-1.5">
             <div className="min-w-0 flex-1">
-              <DatePicker value={shiftStartDate} onChange={setShiftStartDate} />
+              <DatePicker
+                value={form.shiftStartDate}
+                onChange={(date) => setField("shiftStartDate", date)}
+              />
             </div>
             <TimePicker
-              value={shiftStartTime}
-              onChange={setShiftStartTime}
+              value={form.shiftStartTime}
+              onChange={(value) => setField("shiftStartTime", value)}
               aria-label="Schichtbeginn Uhrzeit"
               className="w-24 shrink-0"
             />
@@ -56,11 +43,14 @@ export function ShiftDataCard() {
         <Field label="Schichtende " required>
           <div className="flex gap-1.5">
             <div className="min-w-0 flex-1">
-              <DatePicker value={shiftEndDate} onChange={setShiftEndDate} />
+              <DatePicker
+                value={form.shiftEndDate}
+                onChange={(date) => setField("shiftEndDate", date)}
+              />
             </div>
             <TimePicker
-              value={shiftEndTime}
-              onChange={setShiftEndTime}
+              value={form.shiftEndTime}
+              onChange={(value) => setField("shiftEndTime", value)}
               aria-label="Schichtende Uhrzeit"
               className="w-24 shrink-0"
             />
@@ -73,8 +63,8 @@ export function ShiftDataCard() {
             type="number"
             inputMode="numeric"
             min={0}
-            value={breakMinutes}
-            onChange={(event) => setBreakMinutes(event.target.value)}
+            value={form.breakMinutes}
+            onChange={(event) => setField("breakMinutes", event.target.value)}
             className="font-mono tabular-nums"
           />
         </Field>
@@ -82,11 +72,14 @@ export function ShiftDataCard() {
         <Field label="Pausenbeginn">
           <div className="flex gap-1.5">
             <div className="min-w-0 flex-1">
-              <DatePicker value={breakStartDate} onChange={setBreakStartDate} />
+              <DatePicker
+                value={form.breakStartDate}
+                onChange={(date) => setField("breakStartDate", date)}
+              />
             </div>
             <TimePicker
-              value={breakStartTime}
-              onChange={setBreakStartTime}
+              value={form.breakStartTime}
+              onChange={(value) => setField("breakStartTime", value)}
               aria-label="Pausenbeginn Uhrzeit"
               className="w-24 shrink-0"
             />
@@ -96,13 +89,13 @@ export function ShiftDataCard() {
         <Field label="Nachtzuschlag-Zeitfenster " required>
           <div className="flex gap-1.5">
             <TimePicker
-              value={nightFrom}
-              onChange={setNightFrom}
+              value={form.nightFrom}
+              onChange={(value) => setField("nightFrom", value)}
               aria-label="Nachtzuschlag von"
             />
             <TimePicker
-              value={nightTo}
-              onChange={setNightTo}
+              value={form.nightTo}
+              onChange={(value) => setField("nightTo", value)}
               aria-label="Nachtzuschlag bis"
             />
           </div>
@@ -110,8 +103,9 @@ export function ShiftDataCard() {
 
         <Field label="Bundesland" htmlFor="federal-state">
           <Select
-            value={state}
-            onValueChange={(value) => setState(value ?? "")}
+            items={FEDERAL_STATE_ITEMS}
+            value={form.stateValue}
+            onValueChange={(value) => setField("stateValue", value ?? "none")}
           >
             <SelectTrigger id="federal-state" className="w-full">
               <SelectValue placeholder="Bundesland wählen" />

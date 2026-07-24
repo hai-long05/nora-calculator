@@ -90,10 +90,13 @@
     --sidebar-border: oklch(0.9276 0.0058 264.5313);
     --sidebar-ring: oklch(0.6231 0.188 259.8145);
 
-    --cat-feiertag: var(--destructive);
-    --cat-sonntag: var(--primary);
-    --cat-nacht: var(--chart-5);
-    --cat-samstag: var(--chart-3);
+    /* Categorical accents — validated (dataviz skill) for distinct hues on the
+       light surface: normal-vision ΔE floor clears; identity always paired with
+       a text label on tiles and priority rows. */
+    --cat-feiertag: #e34948;
+    --cat-sonntag: #2a78d6;
+    --cat-nacht: #a83ab0;
+    --cat-samstag: #1baf7a;
     --cat-normal: var(--muted-foreground);
 }
 
@@ -131,10 +134,11 @@
     --sidebar-border: oklch(0.3715 0 0);
     --sidebar-ring: oklch(0.6231 0.188 259.8145);
 
-    --cat-feiertag: var(--destructive);
-    --cat-sonntag: var(--primary);
-    --cat-nacht: var(--chart-5);
-    --cat-samstag: var(--chart-3);
+    /* Same hues re-stepped for the dark surface (validated for the dark band). */
+    --cat-feiertag: #e66767;
+    --cat-sonntag: #3987e5;
+    --cat-nacht: #c05ac0;
+    --cat-samstag: #199e70;
     --cat-normal: var(--muted-foreground);
 }
 
@@ -148,4 +152,26 @@
   html {
     @apply font-sans;
     }
+}
+
+@layer utilities {
+  /* Slim scrollbar themed with the app's tokens (light + dark aware). */
+  .scrollbar-app {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .scrollbar-app::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-app::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-app::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 999px;
+  }
+  .scrollbar-app:hover::-webkit-scrollbar-thumb {
+    background: var(--muted-foreground);
+  }
 }
