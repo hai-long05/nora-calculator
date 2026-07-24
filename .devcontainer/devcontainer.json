@@ -1,0 +1,21 @@
+{
+  "name": "nora-calculator",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:24-bookworm",
+
+  "features": {},
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "oven.bun-vscode",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "anthropic.claude-code"
+      ]
+    }
+  },
+
+  "forwardPorts": [5174],
+  "remoteUser": "root"
+}

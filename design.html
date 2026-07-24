@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zuschlagsrechner — Entwurf (A+B, poliert)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.3211 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.3211 0 0);
+    --primary: oklch(58.333% 0.21257 260.128);
+    --primary-foreground: oklch(1 0 0);
+    --secondary: oklch(0.967 0.0029 264.5419);
+    --secondary-foreground: oklch(0.4461 0.0263 256.8018);
+    --muted: oklch(0.9846 0.0017 247.8389);
+    --muted-foreground: oklch(0.551 0.0234 264.3637);
+    --accent: oklch(0.9514 0.025 236.8242);
+    --accent-foreground: oklch(0.3791 0.1378 265.5222);
+    --destructive: oklch(0.6368 0.2078 25.3313);
+    --destructive-foreground: oklch(1 0 0);
+    --border: oklch(0.9276 0.0058 264.5313);
+    --input: oklch(0.9276 0.0058 264.5313);
+    --ring: oklch(0.6231 0.188 259.8145);
+    --chart-1: oklch(0.6231 0.188 259.8145);
+    --chart-2: oklch(0.5461 0.2152 262.8809);
+    --chart-3: oklch(0.4882 0.2172 264.3763);
+    --chart-4: oklch(0.4244 0.1809 265.6377);
+    --chart-5: oklch(0.3791 0.1378 265.5222);
+    --radius: 0.375rem;
+    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+
+    --cat-feiertag: var(--destructive);
+    --cat-sonntag: var(--primary);
+    --cat-nacht: var(--chart-5);
+    --cat-samstag: var(--chart-3);
+    --cat-normal: var(--muted-foreground);
+  }
+  .dark{
+    --background: oklch(0.2046 0 0);
+    --foreground: oklch(0.9219 0 0);
+    --card: oklch(0.2686 0 0);
+    --card-foreground: oklch(0.9219 0 0);
+    --primary: oklch(0.6231 0.188 259.8145);
+    --primary-foreground: oklch(1 0 0);
+    --secondary: oklch(0.2686 0 0);
+    --secondary-foreground: oklch(0.9219 0 0);
+    --muted: oklch(0.2393 0 0);
+    --muted-foreground: oklch(0.7155 0 0);
+    --accent: oklch(0.3791 0.1378 265.5222);
+    --accent-foreground: oklch(0.8823 0.0571 254.1284);
+    --destructive: oklch(0.6368 0.2078 25.3313);
+    --destructive-foreground: oklch(1 0 0);
+    --border: oklch(0.3715 0 0);
+    --input: oklch(0.3715 0 0);
+    --ring: oklch(0.6231 0.188 259.8145);
+    --chart-1: oklch(0.7137 0.1434 254.624);
+    --chart-2: oklch(0.6231 0.188 259.8145);
+    --chart-3: oklch(0.5461 0.2152 262.8809);
+    --chart-4: oklch(0.4882 0.2172 264.3763);
+    --chart-5: oklch(0.4244 0.1809 265.6377);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--background);
+    color:var(--foreground);
+    font-family:'Inter',ui-sans-serif,system-ui,sans-serif;
+    font-size:14px;
+    line-height:1.45;
+    padding:18px 16px 32px;
+    transition:background .15s ease, color .15s ease;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+  .mono{ font-family:'JetBrains Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums; }
+  .wrap{ max-width:820px; margin:0 auto; }
+
+  /* header */
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+  }
+  .title-block h1{
+    font-size:19px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    margin:0 0 2px;
+  }
+  .title-block .sub{
+    font-size:12.5px;
+    color:var(--muted-foreground);
+  }
+  .header-actions{ display:flex; align-items:center; gap:8px; }
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--secondary);
+    color:var(--secondary-foreground);
+    font-size:12px;
+    font-weight:500;
+    padding:5px 10px;
+    border-radius:999px;
+    border:1px solid var(--border);
+  }
+  .theme-toggle{
+    width:30px; height:30px;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--border);
+    background:var(--card);
+    color:var(--muted-foreground);
+    border-radius:var(--radius);
+    cursor:pointer;
+    font-size:13px;
+  }
+  .theme-toggle:hover{ background:var(--muted); color:var(--foreground); }
+
+  /* card */
+  .card{
+    background:var(--card);
+    color:var(--card-foreground);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-xs);
+    padding:14px 18px;
+    margin-bottom:10px;
+  }
+  .card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:10px;
+  }
+  .card-head h2{
+    font-size:12px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--muted-foreground);
+    margin:0;
+  }
+  .card-head .hint-inline{
+    font-size:11.5px;
+    color:var(--muted-foreground);
+  }
+
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:9px 12px; }
+  .field label{
+    display:block;
+    font-size:12.5px;
+    font-weight:500;
+    margin-bottom:4px;
+    color:var(--foreground);
+  }
+  .field label .req{ color:var(--destructive); }
+  .field .hint{
+    display:block;
+    font-size:11px;
+    color:var(--muted-foreground);
+    margin-top:3px;
+  }
+  .row-pair{ display:flex; gap:6px; }
+  input, select{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    padding:6px 9px;
+    border:1px solid var(--input);
+    border-radius:calc(var(--radius) - 2px);
+    background:var(--background);
+    color:var(--foreground);
+    height:32px;
+  }
+  input.mono{ font-family:'JetBrains Mono',monospace; }
+  input:focus, select:focus{
+    outline:none;
+    border-color:var(--ring);
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--ring) 22%, transparent);
+  }
+  .field{ margin-bottom:0; }
+
+  /* holiday overrides */
+  .holiday-section{
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid var(--border);
+  }
+  .holiday-section > label{
+    display:block;
+    font-size:12.5px;
+    font-weight:500;
+    margin-bottom:7px;
+  }
+  .holiday-list{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+  }
+  .holiday-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border:1px solid var(--border);
+    border-radius:calc(var(--radius) - 2px);
+    padding:7px 10px;
+    background:var(--background);
+  }
+  .hr-date{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    width:170px;
+    flex-shrink:0;
+  }
+  .hr-date .mono{ font-size:13px; font-weight:500; }
+  .hr-weekday{ font-size:12px; color:var(--muted-foreground); }
+  .hr-status{
+    flex:1;
+    font-size:12px;
+    color:var(--muted-foreground);
+  }
+  .switch{ position:relative; display:inline-flex; flex-shrink:0; cursor:pointer; }
+  .switch input{ position:absolute; opacity:0; width:1px; height:1px; }
+  .switch-track{
+    width:34px; height:20px;
+    background:var(--input);
+    border-radius:999px;
+    position:relative;
+    transition:background .15s ease;
+  }
+  .switch-thumb{
+    position:absolute;
+    top:2px; left:2px;
+    width:16px; height:16px;
+    background:var(--card);
+    border-radius:50%;
+    box-shadow:var(--shadow-xs);
+    transition:transform .15s ease;
+  }
+  .switch input:checked + .switch-track{ background:var(--primary); }
+  .switch input:checked + .switch-track .switch-thumb{ transform:translateX(14px); }
+  .switch input:focus-visible + .switch-track{
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--ring) 22%, transparent);
+  }
+  .holiday-row:has(input:checked) .hr-status{ color:var(--foreground); font-weight:500; }
+
+  /* priority list */
+  .priority-list{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+  }
+  .priority-list .row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border:1px solid var(--border);
+    border-radius:calc(var(--radius) - 2px);
+    padding:6px 10px;
+    background:var(--background);
+  }
+  .priority-list .handle{ color:var(--muted-foreground); font-size:13px; cursor:grab; letter-spacing:-1px; }
+  .priority-list .idx{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--muted-foreground);
+    width:16px;
+  }
+  .priority-list .dot{ width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .priority-list .name{ flex:1; font-size:13.5px; font-weight:500; }
+  .priority-list .arrows{ display:flex; gap:3px; }
+  .priority-list button{
+    width:24px; height:24px;
+    border:1px solid var(--border);
+    background:var(--card);
+    color:var(--muted-foreground);
+    border-radius:calc(var(--radius) - 4px);
+    cursor:pointer;
+    font-size:10px;
+  }
+  .priority-list button:hover{ background:var(--muted); color:var(--foreground); }
+
+  .btn-primary{
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    font-weight:600;
+    background:var(--primary);
+    color:var(--primary-foreground);
+    border:none;
+    border-radius:calc(var(--radius) - 2px);
+    padding:8px 16px;
+    cursor:pointer;
+    width:100%;
+    margin-top:10px;
+    box-shadow:var(--shadow-sm);
+    height:34px;
+  }
+  .btn-primary:hover{ background:color-mix(in srgb, var(--primary) 88%, black); }
+
+  /* results */
+  .stat-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:7px;
+    margin-bottom:10px;
+  }
+  .stat{
+    border:1px solid var(--border);
+    border-left:3px solid var(--cat, var(--border));
+    border-radius:calc(var(--radius) - 2px);
+    background:var(--background);
+    padding:8px 9px;
+  }
+  .stat .lbl{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:10.5px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:var(--muted-foreground);
+    margin-bottom:6px;
+  }
+  .stat .lbl .dot{ width:6px; height:6px; border-radius:50%; background:var(--cat); flex-shrink:0; }
+  .stat .value{
+    font-size:17px;
+    font-weight:600;
+    color:var(--foreground);
+    line-height:1;
+  }
+  .stat .range{ font-size:10.5px; color:var(--muted-foreground); margin-top:4px; }
+
+  .stat.feiertag{ --cat: var(--cat-feiertag); }
+  .stat.sonntag{ --cat: var(--cat-sonntag); }
+  .stat.nacht{ --cat: var(--cat-nacht); }
+  .stat.samstag{ --cat: var(--cat-samstag); }
+  .stat.normal{ --cat: var(--cat-normal); }
+
+  .timeline-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:var(--muted-foreground);
+    margin-bottom:5px;
+  }
+  .timeline{
+    display:flex;
+    height:10px;
+    border-radius:3px;
+    overflow:hidden;
+    border:1px solid var(--border);
+  }
+  .timeline .seg{ height:100%; }
+  .timeline .seg.samstag{ width:20%; background:var(--cat-samstag); }
+  .timeline .seg.nacht{ width:20%; background:var(--cat-nacht); }
+  .timeline .seg.pause{ width:5%; background:repeating-linear-gradient(45deg, var(--muted), var(--muted) 3px, var(--border) 3px, var(--border) 6px); }
+  .timeline .seg.sonntag{ width:55%; background:var(--cat-sonntag); }
+
+  .total-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:10px;
+    padding:10px 14px;
+    border:1px solid var(--primary);
+    background:var(--accent);
+    border-radius:calc(var(--radius) - 2px);
+  }
+  .total-row .lbl{
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--foreground);
+  }
+  .total-row .value{
+    font-size:21px;
+    font-weight:700;
+    color:var(--primary);
+  }
+
+  footer{
+    margin-top:6px;
+    font-size:11px;
+    color:var(--muted-foreground);
+    display:flex;
+    justify-content:space-between;
+  }
+
+  @media (max-width:680px){
+    .grid2{ grid-template-columns:1fr; }
+    .stat-grid{ grid-template-columns:repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title-block">
+      <h1>Zuschlagsrechner</h1>
+      <div class="sub">Berechnung der Zuschlagsstunden je Schicht</div>
+    </div>
+    <div class="header-actions">
+      <span class="badge">Brandenburg</span>
+      <button class="theme-toggle" id="themeToggle" aria-label="Farbschema wechseln" onclick="document.documentElement.classList.toggle('dark')">◐</button>
+    </div>
+  </header>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Schichtdaten</h2>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>Schichtbeginn <span class="req">*</span></label>
+        <div class="row-pair">
+          <input class="mono" type="text" value="18.07.2026">
+          <input class="mono" type="text" value="20:00">
+        </div>
+      </div>
+      <div class="field">
+        <label>Schichtende <span class="req">*</span></label>
+        <div class="row-pair">
+          <input class="mono" type="text" value="19.07.2026">
+          <input class="mono" type="text" value="06:00">
+        </div>
+      </div>
+      <div class="field">
+        <label>Pausendauer (Minuten) <span class="req">*</span></label>
+        <input class="mono" type="text" value="30">
+      </div>
+      <div class="field">
+        <label>Pausenbeginn</label>
+        <div class="row-pair">
+          <input class="mono" type="text" value="19.07.2026">
+          <input class="mono" type="text" value="00:00">
+        </div>
+      </div>
+      <div class="field">
+        <label>Nachtzuschlag-Zeitfenster <span class="req">*</span></label>
+        <div class="row-pair">
+          <input class="mono" type="text" value="22:00">
+          <input class="mono" type="text" value="06:00">
+        </div>
+      </div>
+      <div class="field">
+        <label>Bundesland</label>
+        <select>
+          <option>Brandenburg</option>
+          <option>Bayern</option>
+          <option>Berlin</option>
+          <option>— ohne Auswahl —</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="holiday-section">
+      <label>Feiertage in diesem Zeitraum</label>
+      <div class="holiday-list">
+        <div class="holiday-row">
+          <div class="hr-date">
+            <span class="mono">18.07.2026</span>
+            <span class="hr-weekday">Samstag</span>
+          </div>
+          <span class="hr-status">Automatisch erkannt · kein Feiertag</span>
+          <label class="switch">
+            <input type="checkbox" aria-label="18.07.2026 als Feiertag behandeln">
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+        <div class="holiday-row">
+          <div class="hr-date">
+            <span class="mono">19.07.2026</span>
+            <span class="hr-weekday">Sonntag</span>
+          </div>
+          <span class="hr-status">Automatisch erkannt · kein Feiertag</span>
+          <label class="switch">
+            <input type="checkbox" aria-label="19.07.2026 als Feiertag behandeln">
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Prioritätsreihenfolge</h2>
+      <span class="hint-inline">bei Überschneidung mehrerer Kategorien</span>
+    </div>
+    <div class="priority-list">
+      <div class="row">
+        <span class="handle">⠿</span>
+        <span class="idx">01</span>
+        <span class="dot" style="background:var(--cat-feiertag)"></span>
+        <span class="name">Feiertag</span>
+        <span class="arrows"><button aria-label="nach oben">▲</button><button aria-label="nach unten">▼</button></span>
+      </div>
+      <div class="row">
+        <span class="handle">⠿</span>
+        <span class="idx">02</span>
+        <span class="dot" style="background:var(--cat-sonntag)"></span>
+        <span class="name">Sonntag</span>
+        <span class="arrows"><button aria-label="nach oben">▲</button><button aria-label="nach unten">▼</button></span>
+      </div>
+      <div class="row">
+        <span class="handle">⠿</span>
+        <span class="idx">03</span>
+        <span class="dot" style="background:var(--cat-nacht)"></span>
+        <span class="name">Nacht</span>
+        <span class="arrows"><button aria-label="nach oben">▲</button><button aria-label="nach unten">▼</button></span>
+      </div>
+      <div class="row">
+        <span class="handle">⠿</span>
+        <span class="idx">04</span>
+        <span class="dot" style="background:var(--cat-samstag)"></span>
+        <span class="name">Samstag</span>
+        <span class="arrows"><button aria-label="nach oben">▲</button><button aria-label="nach unten">▼</button></span>
+      </div>
+    </div>
+    <button class="btn-primary">Zuschläge berechnen</button>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Ergebnis</h2>
+      <span class="hint-inline">netto, nach Pausenabzug</span>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat feiertag">
+        <div class="lbl"><span class="dot"></span>Feiertag</div>
+        <div class="value mono">0,00 h</div>
+      </div>
+      <div class="stat sonntag">
+        <div class="lbl"><span class="dot"></span>Sonntag</div>
+        <div class="value mono">5,50 h</div>
+        <div class="range mono">00:30–06:00</div>
+      </div>
+      <div class="stat nacht">
+        <div class="lbl"><span class="dot"></span>Nacht</div>
+        <div class="value mono">2,00 h</div>
+        <div class="range mono">22:00–24:00</div>
+      </div>
+      <div class="stat samstag">
+        <div class="lbl"><span class="dot"></span>Samstag</div>
+        <div class="value mono">2,00 h</div>
+        <div class="range mono">20:00–22:00</div>
+      </div>
+      <div class="stat normal">
+        <div class="lbl"><span class="dot"></span>Normal</div>
+        <div class="value mono">0,00 h</div>
+      </div>
+    </div>
+
+    <div class="timeline-label">
+      <span>20:00 · Sa 18.07.2026</span>
+      <span>06:00 · So 19.07.2026</span>
+    </div>
+    <div class="timeline">
+      <div class="seg samstag"></div>
+      <div class="seg nacht"></div>
+      <div class="seg pause"></div>
+      <div class="seg sonntag"></div>
+    </div>
+
+    <div class="total-row">
+      <span class="lbl">Gesamt</span>
+      <span class="value mono">9,50 h</span>
+    </div>
+  </div>
+
+  <footer>
+    <span>Zuschlagsrechner</span>
+    <span class="mono">Beleg 2607-0042</span>
+  </footer>
+</div>
+<script>
+  document.querySelectorAll('.holiday-row input[type="checkbox"]').forEach(function(cb){
+    cb.addEventListener('change', function(){
+      var status = cb.closest('.holiday-row').querySelector('.hr-status');
+      status.textContent = cb.checked ? 'Manuell gesetzt · Feiertag' : 'Automatisch erkannt · kein Feiertag';
+    });
+  });
+</script>
+</body>
+</html>
