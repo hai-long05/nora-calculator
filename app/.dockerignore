@@ -1,0 +1,28 @@
+# Never ship local secrets into the build context. Vite inlines any VITE_*
+# variable into the public bundle, so a stray .env must not reach `pnpm build`.
+.env
+.env.*
+!.env.example
+
+# Installed/produced inside the image, not copied from the host.
+node_modules
+dist
+dist-ssr
+.vite
+.pnpm-store
+
+# Not needed to build, and .git would otherwise carry full history into the
+# build stage on every Coolify deploy.
+.git
+.gitignore
+.dockerignore
+Dockerfile
+README.md
+.vscode
+.devcontainer
+
+# Noise
+*.local
+*.log
+.DS_Store
+Thumbs.db
