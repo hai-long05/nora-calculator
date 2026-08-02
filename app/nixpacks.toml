@@ -1,5 +1,6 @@
 [phases.install]
 cmds = [
+  "corepack disable || true",
   "npm install -g pnpm@11.9.0",
   "pnpm i --frozen-lockfile"
 ]
