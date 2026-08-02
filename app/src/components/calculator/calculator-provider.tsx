@@ -41,21 +41,50 @@ function timeOfDay(date: Date): string {
 function createInitialForm(): CalculatorForm {
   const start = roundToHour(new Date())
   const end = new Date(start.getTime() + 9 * HOUR_MS)
-  const breakStart = new Date(start.getTime() + 4 * HOUR_MS)
 
-  return {
+  return withCenteredBreak({
     shiftStartDate: dateOnly(start),
     shiftStartTime: timeOfDay(start),
     shiftEndDate: dateOnly(end),
     shiftEndTime: timeOfDay(end),
     breakMinutes: "30",
-    breakStartDate: dateOnly(breakStart),
-    breakStartTime: timeOfDay(breakStart),
+    breakStartDate: dateOnly(start),
+    breakStartTime: timeOfDay(start),
     nightFrom: "22:00",
     nightTo: "06:00",
     stateValue: "berlin",
     priority: INITIAL_PRIORITY,
     holidayOverrides: {},
+  })
+}
+
+/** Form fields that define the shift span; changing one re-centres the break. */
+const SHIFT_SPAN_FIELDS = new Set<keyof CalculatorForm>([
+  "shiftStartDate",
+  "shiftStartTime",
+  "shiftEndDate",
+  "shiftEndTime",
+])
+
+/**
+ * Move the break start to the exact middle of the shift. Returns the form
+ * unchanged when the shift is not a valid span, so an incomplete or reversed
+ * entry never clobbers the current break time.
+ */
+function withCenteredBreak(form: CalculatorForm): CalculatorForm {
+  const start = combineDateTime(form.shiftStartDate, form.shiftStartTime)
+  const end = combineDateTime(form.shiftEndDate, form.shiftEndTime)
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return form
+  if (end.getTime() <= start.getTime()) return form
+
+  const middleMs = start.getTime() + (end.getTime() - start.getTime()) / 2
+  // Snap to whole minutes — the time picker has no finer resolution.
+  const middle = new Date(Math.round(middleMs / 60_000) * 60_000)
+
+  return {
+    ...form,
+    breakStartDate: dateOnly(middle),
+    breakStartTime: timeOfDay(middle),
   }
 }
 
@@ -216,7 +245,12 @@ export function CalculatorProvider({
 
   const setField = React.useCallback(
     <K extends keyof CalculatorForm>(key: K, value: CalculatorForm[K]) => {
-      setForm((prev) => ({ ...prev, [key]: value }))
+      setForm((prev) => {
+        const next = { ...prev, [key]: value }
+        // Moving the shift re-centres the break; from there the user is free to
+        // adjust the break start manually until the shift changes again.
+        return SHIFT_SPAN_FIELDS.has(key) ? withCenteredBreak(next) : next
+      })
     },
     []
   )
