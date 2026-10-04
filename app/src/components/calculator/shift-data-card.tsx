@@ -4,19 +4,19 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { FEDERAL_STATE_ITEMS, FEDERAL_STATES } from "@/lib/calculator-data"
-import { useCalculator } from "@/components/calculator/calculator-context"
-import { CalcCard } from "@/components/calculator/calc-card"
-import { SectionHeader } from "@/components/calculator/section-header"
-import { Field } from "@/components/calculator/field"
-import { DatePicker } from "@/components/calculator/date-picker"
-import { TimePicker } from "@/components/calculator/time-picker"
-import { HolidayOverrides } from "@/components/calculator/holiday-overrides"
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { FEDERAL_STATE_ITEMS, FEDERAL_STATES } from "@/lib/calculator-data";
+import { useCalculator } from "@/components/calculator/calculator-context";
+import { CalcCard } from "@/components/calculator/calc-card";
+import { SectionHeader } from "@/components/calculator/section-header";
+import { Field } from "@/components/calculator/field";
+import { DatePicker } from "@/components/calculator/date-picker";
+import { TimePicker } from "@/components/calculator/time-picker";
+import { HolidayOverrides } from "@/components/calculator/holiday-overrides";
 
 export function ShiftDataCard() {
-  const { form, setField } = useCalculator()
+  const { form, setField } = useCalculator();
 
   return (
     <CalcCard>
@@ -123,5 +123,5 @@ export function ShiftDataCard() {
 
       <HolidayOverrides />
     </CalcCard>
-  )
+  );
 }

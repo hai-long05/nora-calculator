@@ -1,46 +1,46 @@
-import * as React from "react"
+import * as React from "react";
 
-import { INITIAL_PRIORITY, stateCodeFromValue } from "@/lib/calculator-data"
-import { fetchHolidays, isoDate } from "@/lib/holidays"
+import { INITIAL_PRIORITY, stateCodeFromValue } from "@/lib/calculator-data";
+import { fetchHolidays, isoDate } from "@/lib/holidays";
 import {
   calculateSurcharges,
   timeStringToMinutes,
   type SurchargeInput,
-} from "@/lib/surcharge"
+} from "@/lib/surcharge";
 import {
   CalculatorContext,
   type CalculatorContextValue,
   type CalculatorForm,
   type HolidayDay,
-} from "@/components/calculator/calculator-context"
+} from "@/components/calculator/calculator-context";
 
-const HOUR_MS = 60 * 60 * 1000
+const HOUR_MS = 60 * 60 * 1000;
 
 function pad2(value: number): string {
-  return String(value).padStart(2, "0")
+  return String(value).padStart(2, "0");
 }
 
 /** Round a datetime to the nearest full hour (00 minutes). */
 function roundToHour(date: Date): Date {
-  const rounded = new Date(date)
-  const roundUp = rounded.getMinutes() >= 30
-  rounded.setMinutes(0, 0, 0)
-  if (roundUp) rounded.setHours(rounded.getHours() + 1)
-  return rounded
+  const rounded = new Date(date);
+  const roundUp = rounded.getMinutes() >= 30;
+  rounded.setMinutes(0, 0, 0);
+  if (roundUp) rounded.setHours(rounded.getHours() + 1);
+  return rounded;
 }
 
 function dateOnly(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
 function timeOfDay(date: Date): string {
-  return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`
+  return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
 }
 
 /** Default form: shift starts at the current rounded hour and lasts 9 hours. */
 function createInitialForm(): CalculatorForm {
-  const start = roundToHour(new Date())
-  const end = new Date(start.getTime() + 9 * HOUR_MS)
+  const start = roundToHour(new Date());
+  const end = new Date(start.getTime() + 9 * HOUR_MS);
 
   return withCenteredBreak({
     shiftStartDate: dateOnly(start),
@@ -55,7 +55,7 @@ function createInitialForm(): CalculatorForm {
     stateValue: "berlin",
     priority: INITIAL_PRIORITY,
     holidayOverrides: {},
-  })
+  });
 }
 
 /** Form fields that define the shift span; changing one re-centres the break. */
@@ -64,7 +64,7 @@ const SHIFT_SPAN_FIELDS = new Set<keyof CalculatorForm>([
   "shiftStartTime",
   "shiftEndDate",
   "shiftEndTime",
-])
+]);
 
 /**
  * Move the break start to the exact middle of the shift. Returns the form
@@ -72,160 +72,161 @@ const SHIFT_SPAN_FIELDS = new Set<keyof CalculatorForm>([
  * entry never clobbers the current break time.
  */
 function withCenteredBreak(form: CalculatorForm): CalculatorForm {
-  const start = combineDateTime(form.shiftStartDate, form.shiftStartTime)
-  const end = combineDateTime(form.shiftEndDate, form.shiftEndTime)
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return form
-  if (end.getTime() <= start.getTime()) return form
+  const start = combineDateTime(form.shiftStartDate, form.shiftStartTime);
+  const end = combineDateTime(form.shiftEndDate, form.shiftEndTime);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return form;
+  if (end.getTime() <= start.getTime()) return form;
 
-  const middleMs = start.getTime() + (end.getTime() - start.getTime()) / 2
+  const middleMs = start.getTime() + (end.getTime() - start.getTime()) / 2;
   // Snap to whole minutes — the time picker has no finer resolution.
-  const middle = new Date(Math.round(middleMs / 60_000) * 60_000)
+  const middle = new Date(Math.round(middleMs / 60_000) * 60_000);
 
   return {
     ...form,
     breakStartDate: dateOnly(middle),
     breakStartTime: timeOfDay(middle),
-  }
+  };
 }
 
 /** Combine a calendar date with an "HH:mm" string into a full datetime. */
 function combineDateTime(date: Date | undefined, time: string): Date {
-  if (!date) return new Date(NaN)
-  const [hours, minutes] = time.split(":").map(Number)
+  if (!date) return new Date(NaN);
+  const [hours, minutes] = time.split(":").map(Number);
   return new Date(
     date.getFullYear(),
     date.getMonth(),
     date.getDate(),
     hours || 0,
-    minutes || 0
-  )
+    minutes || 0,
+  );
 }
 
 /** Calendar days (at midnight) spanned by the shift, inclusive. */
 function datesInRange(start?: Date, end?: Date): Date[] {
-  if (!start || !end) return []
-  const from = new Date(start.getFullYear(), start.getMonth(), start.getDate())
-  const to = new Date(end.getFullYear(), end.getMonth(), end.getDate())
-  if (to < from) return []
-  const days: Date[] = []
-  const cursor = new Date(from)
+  if (!start || !end) return [];
+  const from = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+  const to = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+  if (to < from) return [];
+  const days: Date[] = [];
+  const cursor = new Date(from);
   // Guard against pathological ranges (e.g. a mistyped year).
   for (let i = 0; cursor <= to && i < 400; i++) {
-    days.push(new Date(cursor))
-    cursor.setDate(cursor.getDate() + 1)
+    days.push(new Date(cursor));
+    cursor.setDate(cursor.getDate() + 1);
   }
-  return days
+  return days;
 }
 
 function buildInput(
   form: CalculatorForm,
-  holidays: HolidayDay[]
+  holidays: HolidayDay[],
 ): SurchargeInput {
-  const breakMinutes = Number(form.breakMinutes)
+  const breakMinutes = Number(form.breakMinutes);
   const breakStart =
     Number.isFinite(breakMinutes) && breakMinutes > 0
       ? combineDateTime(form.breakStartDate, form.breakStartTime)
-      : null
+      : null;
   const breakEnd =
     breakStart && !Number.isNaN(breakStart.getTime())
       ? new Date(breakStart.getTime() + breakMinutes * 60_000)
-      : null
+      : null;
 
   const holidayDates = new Set(
-    holidays.filter((day) => day.effective).map((day) => day.iso)
-  )
+    holidays.filter((day) => day.effective).map((day) => day.iso),
+  );
 
   return {
     start: combineDateTime(form.shiftStartDate, form.shiftStartTime),
     end: combineDateTime(form.shiftEndDate, form.shiftEndTime),
-    breakStart: breakStart && Number.isNaN(breakStart.getTime()) ? null : breakStart,
+    breakStart:
+      breakStart && Number.isNaN(breakStart.getTime()) ? null : breakStart,
     breakEnd,
     nightFromMinutes: timeStringToMinutes(form.nightFrom),
     nightToMinutes: timeStringToMinutes(form.nightTo),
     priority: form.priority,
     holidayDates,
-  }
+  };
 }
 
-const EMPTY_HOLIDAY_MAP = new Map<string, string>()
+const EMPTY_HOLIDAY_MAP = new Map<string, string>();
 
 /** A completed Feiertage API load, tagged with the state+years it was for. */
 interface FetchState {
-  key: string
-  map?: Map<string, string>
-  error?: string
+  key: string;
+  map?: Map<string, string>;
+  error?: string;
 }
 
 export function CalculatorProvider({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const [form, setForm] = React.useState<CalculatorForm>(createInitialForm)
+  const [form, setForm] = React.useState<CalculatorForm>(createInitialForm);
   // Result of the most recent Feiertage API load. Tagged with its request key
   // so a stale response for a previous state/year is ignored during render.
-  const [fetched, setFetched] = React.useState<FetchState | null>(null)
+  const [fetched, setFetched] = React.useState<FetchState | null>(null);
 
   const stateCode = React.useMemo(
     () => stateCodeFromValue(form.stateValue),
-    [form.stateValue]
-  )
+    [form.stateValue],
+  );
   const dates = React.useMemo(
     () => datesInRange(form.shiftStartDate, form.shiftEndDate),
-    [form.shiftStartDate, form.shiftEndDate]
-  )
+    [form.shiftStartDate, form.shiftEndDate],
+  );
   const yearsKey = React.useMemo(
     () => [...new Set(dates.map((date) => date.getFullYear()))].join(","),
-    [dates]
-  )
+    [dates],
+  );
   // Non-null only when there is something to fetch (a state and a date range).
-  const requestKey = stateCode && yearsKey ? `${stateCode}:${yearsKey}` : null
+  const requestKey = stateCode && yearsKey ? `${stateCode}:${yearsKey}` : null;
 
   React.useEffect(() => {
-    if (!stateCode || !yearsKey) return
+    if (!stateCode || !yearsKey) return;
 
-    const key = `${stateCode}:${yearsKey}`
-    let cancelled = false
-    const years = yearsKey.split(",").map(Number)
+    const key = `${stateCode}:${yearsKey}`;
+    let cancelled = false;
+    const years = yearsKey.split(",").map(Number);
 
     Promise.all(years.map((year) => fetchHolidays(year, stateCode)))
       .then((maps) => {
-        if (cancelled) return
-        const merged = new Map<string, string>()
+        if (cancelled) return;
+        const merged = new Map<string, string>();
         for (const map of maps) {
-          for (const [iso, name] of map) merged.set(iso, name)
+          for (const [iso, name] of map) merged.set(iso, name);
         }
-        setFetched({ key, map: merged })
+        setFetched({ key, map: merged });
       })
       .catch(() => {
-        if (cancelled) return
+        if (cancelled) return;
         setFetched({
           key,
           error:
             "Feiertage konnten nicht geladen werden. Bitte manuell festlegen.",
-        })
-      })
+        });
+      });
 
     return () => {
-      cancelled = true
-    }
-  }, [stateCode, yearsKey])
+      cancelled = true;
+    };
+  }, [stateCode, yearsKey]);
 
   // Derive load status for the current request from the tagged fetch result,
   // so no state is set synchronously inside the effect.
-  const settled = fetched?.key === requestKey ? fetched : null
-  const holidayMap = settled?.map ?? EMPTY_HOLIDAY_MAP
-  const holidaysError = settled?.error ?? null
-  const holidaysLoading = requestKey !== null && settled === null
+  const settled = fetched?.key === requestKey ? fetched : null;
+  const holidayMap = settled?.map ?? EMPTY_HOLIDAY_MAP;
+  const holidaysError = settled?.error ?? null;
+  const holidaysLoading = requestKey !== null && settled === null;
 
   const holidays = React.useMemo<HolidayDay[]>(
     () =>
       dates.map((date) => {
-        const iso = isoDate(date)
-        const autoName = holidayMap.get(iso) ?? null
-        const autoHoliday = autoName !== null
-        const override = form.holidayOverrides[iso]
-        const overridden = override !== undefined
+        const iso = isoDate(date);
+        const autoName = holidayMap.get(iso) ?? null;
+        const autoHoliday = autoName !== null;
+        const override = form.holidayOverrides[iso];
+        const overridden = override !== undefined;
         return {
           iso,
           date,
@@ -233,57 +234,57 @@ export function CalculatorProvider({
           autoHoliday,
           effective: overridden ? override : autoHoliday,
           overridden,
-        }
+        };
       }),
-    [dates, holidayMap, form.holidayOverrides]
-  )
+    [dates, holidayMap, form.holidayOverrides],
+  );
 
   const outcome = React.useMemo(
     () => calculateSurcharges(buildInput(form, holidays)),
-    [form, holidays]
-  )
+    [form, holidays],
+  );
 
   const setField = React.useCallback(
     <K extends keyof CalculatorForm>(key: K, value: CalculatorForm[K]) => {
       setForm((prev) => {
-        const next = { ...prev, [key]: value }
+        const next = { ...prev, [key]: value };
         // Moving the shift re-centres the break; from there the user is free to
         // adjust the break start manually until the shift changes again.
-        return SHIFT_SPAN_FIELDS.has(key) ? withCenteredBreak(next) : next
-      })
+        return SHIFT_SPAN_FIELDS.has(key) ? withCenteredBreak(next) : next;
+      });
     },
-    []
-  )
+    [],
+  );
 
   const movePriority = React.useCallback((index: number, direction: -1 | 1) => {
     setForm((prev) => {
-      const target = index + direction
-      if (target < 0 || target >= prev.priority.length) return prev
-      const priority = [...prev.priority]
-      ;[priority[index], priority[target]] = [priority[target], priority[index]]
-      return { ...prev, priority }
-    })
-  }, [])
+      const target = index + direction;
+      if (target < 0 || target >= prev.priority.length) return prev;
+      const priority = [...prev.priority];
+      [priority[index], priority[target]] = [priority[target], priority[index]];
+      return { ...prev, priority };
+    });
+  }, []);
 
   const reorderPriority = React.useCallback((from: number, to: number) => {
     setForm((prev) => {
-      const { length } = prev.priority
+      const { length } = prev.priority;
       if (from === to || from < 0 || to < 0 || from >= length || to >= length) {
-        return prev
+        return prev;
       }
-      const priority = [...prev.priority]
-      const [moved] = priority.splice(from, 1)
-      priority.splice(to, 0, moved)
-      return { ...prev, priority }
-    })
-  }, [])
+      const priority = [...prev.priority];
+      const [moved] = priority.splice(from, 1);
+      priority.splice(to, 0, moved);
+      return { ...prev, priority };
+    });
+  }, []);
 
   const toggleHoliday = React.useCallback((iso: string, value: boolean) => {
     setForm((prev) => ({
       ...prev,
       holidayOverrides: { ...prev.holidayOverrides, [iso]: value },
-    }))
-  }, [])
+    }));
+  }, []);
 
   const value = React.useMemo<CalculatorContextValue>(
     () => ({
@@ -308,8 +309,8 @@ export function CalculatorProvider({
       holidaysLoading,
       holidaysError,
       outcome,
-    ]
-  )
+    ],
+  );
 
-  return <CalculatorContext value={value}>{children}</CalculatorContext>
+  return <CalculatorContext value={value}>{children}</CalculatorContext>;
 }

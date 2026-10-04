@@ -7,11 +7,7 @@
 import type { GermanState } from "@/lib/holidays";
 
 export type CategoryKey =
-  | "feiertag"
-  | "sonntag"
-  | "nacht"
-  | "samstag"
-  | "normal";
+  "feiertag" | "sonntag" | "nacht" | "samstag" | "normal";
 
 /** Categories that can carry a surcharge; "normal" is the implicit fallback. */
 export type SurchargeCategory = Exclude<CategoryKey, "normal">;

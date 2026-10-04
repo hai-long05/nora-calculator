@@ -1,13 +1,13 @@
-import { cn } from "@/lib/utils"
-import { CATEGORY_BG } from "@/lib/calculator-data"
-import type { TimelineSegment } from "@/lib/surcharge"
+import { cn } from "@/lib/utils";
+import { CATEGORY_BG } from "@/lib/calculator-data";
+import type { TimelineSegment } from "@/lib/surcharge";
 
 const PAUSE_PATTERN =
-  "bg-[repeating-linear-gradient(45deg,var(--muted),var(--muted)_3px,var(--border)_3px,var(--border)_6px)]"
+  "bg-[repeating-linear-gradient(45deg,var(--muted),var(--muted)_3px,var(--border)_3px,var(--border)_6px)]";
 
 interface ShiftTimelineProps {
-  segments: TimelineSegment[]
-  bounds: { start: string; end: string }
+  segments: TimelineSegment[];
+  bounds: { start: string; end: string };
 }
 
 export function ShiftTimeline({ segments, bounds }: ShiftTimelineProps) {
@@ -25,12 +25,12 @@ export function ShiftTimeline({ segments, bounds }: ShiftTimelineProps) {
               "h-full",
               segment.kind === "pause" || !segment.category
                 ? PAUSE_PATTERN
-                : CATEGORY_BG[segment.category]
+                : CATEGORY_BG[segment.category],
             )}
             style={{ width: `${segment.widthPercent}%` }}
           />
         ))}
       </div>
     </div>
-  )
+  );
 }

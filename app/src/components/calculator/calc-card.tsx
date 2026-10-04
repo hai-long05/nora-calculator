@@ -1,7 +1,7 @@
-import * as React from "react"
+import * as React from "react";
 
-import { cn } from "@/lib/utils"
-import { Card } from "@/components/ui/card"
+import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
 
 /**
  * Thin wrapper around the shadcn Card that applies the tighter padding,
@@ -15,9 +15,9 @@ export function CalcCard({
     <Card
       className={cn(
         "gap-0 rounded-md border px-[18px] py-3.5 shadow-xs ring-0",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }

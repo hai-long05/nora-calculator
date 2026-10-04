@@ -26,43 +26,45 @@ export type GermanState =
   | "SN"
   | "ST"
   | "SH"
-  | "TH"
+  | "TH";
 
-const API_BASE = "https://feiertage-api.de/api/"
+const API_BASE = "https://feiertage-api.de/api/";
 
 interface FeiertageApiEntry {
-  datum: string
-  hinweis: string
+  datum: string;
+  hinweis: string;
 }
 
-type FeiertageApiResponse = Record<string, FeiertageApiEntry>
+type FeiertageApiResponse = Record<string, FeiertageApiEntry>;
 
 function pad2(value: number): string {
-  return String(value).padStart(2, "0")
+  return String(value).padStart(2, "0");
 }
 
 /** Local (not UTC) ISO date key, e.g. "2026-07-18". */
 export function isoDate(date: Date): string {
-  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
 }
 
-const cache = new Map<string, Promise<Map<string, string>>>()
+const cache = new Map<string, Promise<Map<string, string>>>();
 
 async function requestHolidays(
   year: number,
-  state: GermanState
+  state: GermanState,
 ): Promise<Map<string, string>> {
-  const url = `${API_BASE}?jahr=${year}&nur_land=${state}`
-  const response = await fetch(url)
+  const url = `${API_BASE}?jahr=${year}&nur_land=${state}`;
+  const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`Feiertage API request failed with status ${response.status}`)
+    throw new Error(
+      `Feiertage API request failed with status ${response.status}`,
+    );
   }
-  const data = (await response.json()) as FeiertageApiResponse
-  const holidays = new Map<string, string>()
+  const data = (await response.json()) as FeiertageApiResponse;
+  const holidays = new Map<string, string>();
   for (const [name, entry] of Object.entries(data)) {
-    if (entry?.datum) holidays.set(entry.datum, name)
+    if (entry?.datum) holidays.set(entry.datum, name);
   }
-  return holidays
+  return holidays;
 }
 
 /**
@@ -71,16 +73,16 @@ async function requestHolidays(
  */
 export function fetchHolidays(
   year: number,
-  state: GermanState
+  state: GermanState,
 ): Promise<Map<string, string>> {
-  const key = `${year}:${state}`
-  const cached = cache.get(key)
-  if (cached) return cached
+  const key = `${year}:${state}`;
+  const cached = cache.get(key);
+  if (cached) return cached;
 
   const request = requestHolidays(year, state).catch((error) => {
-    cache.delete(key)
-    throw error
-  })
-  cache.set(key, request)
-  return request
+    cache.delete(key);
+    throw error;
+  });
+  cache.set(key, request);
+  return request;
 }

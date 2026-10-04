@@ -1,16 +1,22 @@
-import * as React from "react"
+import * as React from "react";
 
-import { Label } from "@/components/ui/label"
+import { Label } from "@/components/ui/label";
 
 interface FieldProps {
-  label: string
-  htmlFor?: string
-  required?: boolean
-  hint?: string
-  children: React.ReactNode
+  label: string;
+  htmlFor?: string;
+  required?: boolean;
+  hint?: string;
+  children: React.ReactNode;
 }
 
-export function Field({ label, htmlFor, required, hint, children }: FieldProps) {
+export function Field({
+  label,
+  htmlFor,
+  required,
+  hint,
+  children,
+}: FieldProps) {
   return (
     <div className="flex flex-col gap-1">
       <Label htmlFor={htmlFor} className="text-[12.5px]">
@@ -22,5 +28,5 @@ export function Field({ label, htmlFor, required, hint, children }: FieldProps) 
         <span className="text-[11px] text-muted-foreground">{hint}</span>
       ) : null}
     </div>
-  )
+  );
 }

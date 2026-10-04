@@ -1,6 +1,6 @@
 interface SectionHeaderProps {
-  title: string
-  hint?: string
+  title: string;
+  hint?: string;
 }
 
 export function SectionHeader({ title, hint }: SectionHeaderProps) {
@@ -13,5 +13,5 @@ export function SectionHeader({ title, hint }: SectionHeaderProps) {
         <span className="text-[11.5px] text-muted-foreground">{hint}</span>
       ) : null}
     </div>
-  )
+  );
 }

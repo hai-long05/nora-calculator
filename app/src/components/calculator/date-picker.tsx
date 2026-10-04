@@ -1,23 +1,23 @@
-import * as React from "react"
-import { format } from "date-fns"
-import { de } from "date-fns/locale"
-import { CalendarIcon } from "lucide-react"
+import * as React from "react";
+import { format } from "date-fns";
+import { de } from "date-fns/locale";
+import { CalendarIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 
 interface DatePickerProps {
-  value?: Date
-  onChange?: (date: Date | undefined) => void
-  id?: string
-  placeholder?: string
-  className?: string
+  value?: Date;
+  onChange?: (date: Date | undefined) => void;
+  id?: string;
+  placeholder?: string;
+  className?: string;
 }
 
 export function DatePicker({
@@ -27,7 +27,7 @@ export function DatePicker({
   placeholder = "Datum wählen",
   className,
 }: DatePickerProps) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -39,7 +39,7 @@ export function DatePicker({
             className={cn(
               "h-8 w-full justify-start px-2.5 font-mono text-sm font-normal tabular-nums",
               !value && "text-muted-foreground",
-              className
+              className,
             )}
           >
             <CalendarIcon className="text-muted-foreground" />
@@ -54,12 +54,12 @@ export function DatePicker({
           defaultMonth={value}
           locale={de}
           onSelect={(date) => {
-            onChange?.(date)
-            setOpen(false)
+            onChange?.(date);
+            setOpen(false);
           }}
           autoFocus
         />
       </PopoverContent>
     </Popover>
-  )
+  );
 }

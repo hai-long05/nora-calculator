@@ -1,10 +1,10 @@
-import { MoonIcon, SunIcon } from "lucide-react"
+import { MoonIcon, SunIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { useTheme } from "@/components/theme/theme-context"
+import { Button } from "@/components/ui/button";
+import { useTheme } from "@/components/theme/theme-context";
 
 export function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme()
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <Button
@@ -15,5 +15,5 @@ export function ThemeToggle() {
     >
       {theme === "dark" ? <SunIcon /> : <MoonIcon />}
     </Button>
-  )
+  );
 }
