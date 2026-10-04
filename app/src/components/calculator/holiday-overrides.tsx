@@ -1,24 +1,24 @@
-import { format } from "date-fns"
-import { de } from "date-fns/locale"
+import { format } from "date-fns";
+import { de } from "date-fns/locale";
 
-import { cn } from "@/lib/utils"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { useCalculator } from "@/components/calculator/calculator-context"
-import type { HolidayDay } from "@/components/calculator/calculator-context"
+import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { useCalculator } from "@/components/calculator/calculator-context";
+import type { HolidayDay } from "@/components/calculator/calculator-context";
 
 function statusText(day: HolidayDay): string {
-  const source = day.overridden ? "Manuell gesetzt" : "Automatisch erkannt"
+  const source = day.overridden ? "Manuell gesetzt" : "Automatisch erkannt";
   if (day.effective) {
-    const name = day.overridden ? "Feiertag" : (day.autoName ?? "Feiertag")
-    return `${source} · ${name}`
+    const name = day.overridden ? "Feiertag" : (day.autoName ?? "Feiertag");
+    return `${source} · ${name}`;
   }
-  return `${source} · kein Feiertag`
+  return `${source} · kein Feiertag`;
 }
 
 function HolidayRow({ day }: { day: HolidayDay }) {
-  const { toggleHoliday } = useCalculator()
-  const switchId = `holiday-${day.iso}`
+  const { toggleHoliday } = useCalculator();
+  const switchId = `holiday-${day.iso}`;
 
   return (
     <div className="flex items-center gap-3 rounded-[calc(var(--radius)-2px)] border bg-background px-2.5 py-1.5">
@@ -46,11 +46,11 @@ function HolidayRow({ day }: { day: HolidayDay }) {
         aria-label={`${format(day.date, "dd.MM.yyyy")} als Feiertag behandeln`}
       />
     </div>
-  )
+  );
 }
 
 export function HolidayOverrides() {
-  const { holidays, holidaysLoading, holidaysError } = useCalculator()
+  const { holidays, holidaysLoading, holidaysError } = useCalculator();
 
   return (
     <div className="mt-3 border-t pt-3">
@@ -75,7 +75,7 @@ export function HolidayOverrides() {
             "flex flex-col gap-1.5",
             // Show ~2 rows and scroll the rest when a shift spans many days.
             holidays.length > 2 &&
-              "scrollbar-app max-h-21 overflow-y-auto pr-1"
+              "scrollbar-app max-h-21 overflow-y-auto pr-1",
           )}
         >
           {holidays.map((day) => (
@@ -84,5 +84,5 @@ export function HolidayOverrides() {
         </div>
       )}
     </div>
-  )
+  );
 }

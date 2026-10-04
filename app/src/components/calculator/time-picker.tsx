@@ -1,12 +1,12 @@
-import { cn } from "@/lib/utils"
-import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 
 interface TimePickerProps {
-  value?: string
-  onChange?: (value: string) => void
-  id?: string
-  className?: string
-  "aria-label"?: string
+  value?: string;
+  onChange?: (value: string) => void;
+  id?: string;
+  className?: string;
+  "aria-label"?: string;
 }
 
 /**
@@ -29,8 +29,8 @@ export function TimePicker({
       onChange={(event) => onChange?.(event.target.value)}
       className={cn(
         "font-mono tabular-nums [&::-webkit-calendar-picker-indicator]:opacity-60",
-        className
+        className,
       )}
     />
-  )
+  );
 }

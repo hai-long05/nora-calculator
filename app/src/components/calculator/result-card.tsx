@@ -1,26 +1,28 @@
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 import {
   CATEGORY_BG,
   CATEGORY_BORDER_L,
   CATEGORY_LABELS,
-} from "@/lib/calculator-data"
-import { formatHours } from "@/lib/format"
-import type { CategoryResult } from "@/lib/surcharge"
-import { useCalculator } from "@/components/calculator/calculator-context"
-import { CalcCard } from "@/components/calculator/calc-card"
-import { SectionHeader } from "@/components/calculator/section-header"
-import { ShiftTimeline } from "@/components/calculator/shift-timeline"
+} from "@/lib/calculator-data";
+import { formatHours } from "@/lib/format";
+import type { CategoryResult } from "@/lib/surcharge";
+import { useCalculator } from "@/components/calculator/calculator-context";
+import { CalcCard } from "@/components/calculator/calc-card";
+import { SectionHeader } from "@/components/calculator/section-header";
+import { ShiftTimeline } from "@/components/calculator/shift-timeline";
 
 function StatTile({ stat }: { stat: CategoryResult }) {
   return (
     <div
       className={cn(
         "rounded-[calc(var(--radius)-2px)] border border-l-[3px] bg-background px-2.5 py-2",
-        CATEGORY_BORDER_L[stat.category]
+        CATEGORY_BORDER_L[stat.category],
       )}
     >
       <div className="mb-1.5 flex items-center gap-1.5 text-[10.5px] font-semibold tracking-wide text-muted-foreground uppercase">
-        <span className={cn("size-1.5 rounded-full", CATEGORY_BG[stat.category])} />
+        <span
+          className={cn("size-1.5 rounded-full", CATEGORY_BG[stat.category])}
+        />
         {CATEGORY_LABELS[stat.category]}
       </div>
       <div className="font-mono text-[17px] leading-none font-semibold tabular-nums">
@@ -32,11 +34,11 @@ function StatTile({ stat }: { stat: CategoryResult }) {
         </div>
       ) : null}
     </div>
-  )
+  );
 }
 
 export function ResultCard() {
-  const { result, error } = useCalculator()
+  const { result, error } = useCalculator();
 
   return (
     <CalcCard>
@@ -67,5 +69,5 @@ export function ResultCard() {
         </>
       )}
     </CalcCard>
-  )
+  );
 }
